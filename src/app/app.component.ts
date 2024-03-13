@@ -1,11 +1,11 @@
-import { Component } from "@angular/core";
+import { Component, ViewChild, signal } from "@angular/core";
 import {
   Form,
   FormControl,
   FormsModule,
   ReactiveFormsModule,
 } from "@angular/forms";
-import { CalendarModule } from "primeng/calendar";
+import { Calendar, CalendarModule } from "primeng/calendar";
 
 @Component({
   selector: "app-root",
@@ -23,21 +23,22 @@ import { CalendarModule } from "primeng/calendar";
       <h2>Week Calendar</h2>
       <div class="week-cal">
         <p-calendar
+          #pCalendar
           [(ngModel)]="date1"
           selectionMode="range"
-          (onSelect)="handler($event)"
-          [hideOnDateTimeSelect]="true"
+          (onSelect)="onHandler($event)"
         ></p-calendar>
       </div>
     </div>
-
+    <br />
+    <br />
+    <br />
     <h2>Range Form Control</h2>
     <div class="week-cal">
       <p-calendar
         [formControl]="dateControl"
         selectionMode="range"
         (onSelect)="closeCalendarOverlay($event)"
-        [hideOnDateTimeSelect]="true"
       ></p-calendar>
     </div>
   `,
@@ -52,14 +53,15 @@ import { CalendarModule } from "primeng/calendar";
   `,
 })
 export class AppComponent {
-  date1: any;
+  date1 = signal<Date[]>([new Date()]);
+  @ViewChild("pCalendar") calendar!: Calendar;
   dateControl = new FormControl([new Date()]);
 
-  handler($event: any) {
-    console.log("event -->", $event);
+  onHandler($event: any) {
     const weeks = this.getStartAndEndOfWeek($event);
-    console.log("weeks -->", weeks);
-    this.date1 = weeks;
+    this.date1.set(weeks);
+    console.log(this.date1());
+    this.calendar.hideOverlay();
   }
 
   closeCalendarOverlay($event: any) {
@@ -76,19 +78,6 @@ export class AppComponent {
     const sundayOffset = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
     startDate.setDate(currentDate.getDate() - sundayOffset); // Start date is the previous Sunday
     endDate.setDate(currentDate.getDate() + (6 - sundayOffset)); //
-    console.log(
-      "startDate -->",
-      startDate.toISOString().slice(0, 10),
-      "endDate -->",
-      endDate.toISOString().slice(0, 10)
-    );
-
     return [startDate, endDate];
   }
-
-  // Example usage:
-  // const inputDate = new Date('2024-03-13');
-  // const { startOfWeek, endOfWeek } =
-  // console.log("Start of the week:", startOfWeek); // Output: Start of the week: 2024-03-11
-  // console.log("End o
 }
